@@ -97,3 +97,9 @@ type SkillDataSchema struct {
 		Character Character       `json:"character"`
 	} `json:"data"`
 }
+
+type CharacterSchema struct {
+	Data struct {
+		Character Character `json:"character"`
+	} `json:"data"`
+}

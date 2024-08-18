@@ -23,11 +23,21 @@ type Item struct {
 	Count string `json:"count"`
 }
 
-func sendRequest(action string, body []byte) ([]byte, int) {
+func sendActionRequest(action string, body []byte) ([]byte, int) {
+	character := "LegDay"
+	endpoint := fmt.Sprintf("/my/%s/action/%s", character, action)
+	return sendRequest(body, endpoint)
+}
+
+func sendCharacterRequest(name string) ([]byte, int) {
+	endpoint := fmt.Sprintf("/characters/%s", name)
+	return sendRequest([]byte{}, endpoint)
+}
+
+func sendRequest(body []byte, endpoint string) ([]byte, int) {
 	server := "https://api.artifactsmmo.com"
 	token := "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IkpvaGFuU2t1bGxjcnVzaGVyIiwicGFzc3dvcmRfY2hhbmdlZCI6IiJ9.XSij4JbWgWhHyExSkV8aIt6373cNr6HXzGQEP4xn2Ks"
-	character := "LegDay"
-	url := fmt.Sprintf("%s/my/%s/action/%s", server, character, action)
+	url := fmt.Sprintf("%s%s", server, endpoint)
 	r, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
 		panic(err)
@@ -53,16 +63,16 @@ func Move(c Coordinate) ([]byte, int) {
 	if err != nil {
 		panic(err)
 	}
-	return sendRequest("move", b)
+	return sendActionRequest("move", b)
 }
 
 func Fight() ([]byte, int) {
-	return sendRequest("fight", []byte{})
+	return sendActionRequest("fight", []byte{})
 }
 
 func Gathering() ([]byte, int) {
 	fmt.Println("Gathering at current location")
-	return sendRequest("gathering", []byte{})
+	return sendActionRequest("gathering", []byte{})
 }
 
 func Crafting(item Item) ([]byte, int) {
@@ -70,7 +80,7 @@ func Crafting(item Item) ([]byte, int) {
 	if err != nil {
 		panic(err)
 	}
-	return sendRequest("crafting", b)
+	return sendActionRequest("crafting", b)
 }
 
 func Recycling() {
@@ -82,7 +92,7 @@ func Equip(item Item) ([]byte, int) {
 	if err != nil {
 		panic(err)
 	}
-	return sendRequest("equip", b)
+	return sendActionRequest("equip", b)
 }
 
 func Unequip(slot Slot) ([]byte, int) {
@@ -90,7 +100,7 @@ func Unequip(slot Slot) ([]byte, int) {
 	if err != nil {
 		panic(err)
 	}
-	return sendRequest("unequip", b)
+	return sendActionRequest("unequip", b)
 }
 
 func Delete() {
@@ -127,4 +137,14 @@ func TaskAccept() {
 
 func TaskComplete() {
 
+}
+
+func GetInventory() []InventorySlot {
+	res, code := sendCharacterRequest("LegDay")
+	if code != 200 {
+		panic(code)
+	}
+	var response CharacterSchema
+	json.Unmarshal(res, &response)
+	return response.Data.Character.Inventory
 }

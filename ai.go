@@ -9,7 +9,7 @@ import (
 func WaitOnCooldown(res []byte) {
 	var response SkillDataSchema
 	json.Unmarshal(res, &response)
-	d := time.Duration(response.Data.Cooldown.Remaining_Seconds+1) * time.Second
+	d := time.Duration(response.Data.Cooldown.Remaining_Seconds) * time.Second
 	fmt.Println(fmt.Sprintf("Sleeping for %s seconds", d))
 	time.Sleep(d)
 }
@@ -41,6 +41,10 @@ func GatherLoop() {
 			WaitOnCooldown(res)
 		}
 	}
+}
+
+func CopperLoop() {
+
 }
 
 func CraftMax(item string) {
