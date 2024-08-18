@@ -120,8 +120,14 @@ func BankDeposit(code string, quantity int) ([]byte, int) {
 	return sendActionRequest("bank/deposit", b)
 }
 
-func BankWithdraw() {
-
+func BankWithdraw(code string, quantity int) ([]byte, int) {
+	fmt.Printf("Requesting %d %s from bank\n", quantity, code)
+	item := Item{Code: code, Quantity: quantity}
+	b, err := json.Marshal(item)
+	if err != nil {
+		panic(err)
+	}
+	return sendActionRequest("bank/withdraw", b)
 }
 
 func BankDepositGold() {
