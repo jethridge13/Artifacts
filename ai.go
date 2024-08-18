@@ -16,6 +16,8 @@ func WaitOnCooldown(res []byte) {
 
 func PrintStatus(code int) {
 	switch code {
+	case 478:
+		fmt.Println("Missing item or insufficient quantity")
 	case 486:
 		fmt.Println("Action already in progress")
 	case 493:
@@ -29,7 +31,7 @@ func PrintStatus(code int) {
 	case 598:
 		fmt.Println("Resource not found on map")
 	default:
-		fmt.Printf("Unknown code %d", code)
+		fmt.Printf("Unknown code %d\n", code)
 	}
 }
 
