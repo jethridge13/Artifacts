@@ -18,9 +18,10 @@ type Slot struct {
 }
 
 type Item struct {
-	Code  string `json:"code"`
-	Slot  string `json:"slot"`
-	Count string `json:"count"`
+	Code     string `json:"code"`
+	Slot     string `json:"slot"`
+	Count    int    `json:"count"`
+	Quantity int    `json:"quantity"`
 }
 
 func sendActionRequest(action string, body []byte) ([]byte, int) {
@@ -59,6 +60,7 @@ func sendRequest(body []byte, endpoint string) ([]byte, int) {
 }
 
 func Move(c Coordinate) ([]byte, int) {
+	fmt.Printf("Moving to %d, %d\n", c.X, c.Y)
 	b, err := json.Marshal(c)
 	if err != nil {
 		panic(err)
@@ -76,6 +78,7 @@ func Gathering() ([]byte, int) {
 }
 
 func Crafting(item Item) ([]byte, int) {
+	fmt.Printf("Crafting %s\n", item.Code)
 	b, err := json.Marshal(item)
 	if err != nil {
 		panic(err)
@@ -107,8 +110,14 @@ func Delete() {
 
 }
 
-func BankDeposit() {
-
+func BankDeposit(code string, quantity int) ([]byte, int) {
+	fmt.Printf("Depositing %d %s into bank\n", quantity, code)
+	item := Item{Code: code, Quantity: quantity}
+	b, err := json.Marshal(item)
+	if err != nil {
+		panic(err)
+	}
+	return sendActionRequest("bank/deposit", b)
 }
 
 func BankWithdraw() {

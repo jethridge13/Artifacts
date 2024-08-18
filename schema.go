@@ -103,3 +103,31 @@ type CharacterSchema struct {
 		Character Character `json:"character"`
 	} `json:"data"`
 }
+
+type MapContentSchema struct {
+	Type string `json:"type"`
+	Code string `json:"code"`
+}
+
+type MapSchema struct {
+	Name    string           `json:"name"`
+	Skin    string           `json:"skin"`
+	X       int              `json:"x"`
+	Y       int              `json:"y"`
+	Content MapContentSchema `json:"content"`
+}
+
+type GetMapSchema struct {
+	Data  []MapSchema `json:"data"`
+	Total int         `json:"total"`
+	Page  int         `json:"page"`
+	Size  int         `json:"size"`
+	Pages int         `json:"pages"`
+}
+
+type GenericSchema struct {
+	Data struct {
+		Cooldown  CooldownSchema `json:"cooldown"`
+		Character Character      `json:"character"`
+	} `json:"data"`
+}
