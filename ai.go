@@ -35,10 +35,10 @@ func PrintStatus(code int) {
 	}
 }
 
-func GatherLoop() {
+func GatherLoop(a Runner) {
 	loop := true
 	for loop {
-		res, status := Gathering()
+		res, status := a.Gathering()
 		if status != 200 {
 			loop = false
 			PrintStatus(status)
@@ -48,11 +48,11 @@ func GatherLoop() {
 	}
 }
 
-func FightLoop() {
+func FightLoop(a Runner) {
 	loop := true
 	lossCount := 0
 	for loop {
-		res, status := Fight()
+		res, status := a.Fight()
 		if status != 200 {
 			loop = false
 			PrintStatus(status)
@@ -72,11 +72,11 @@ func FightLoop() {
 	}
 }
 
-func CraftLoop(code string) {
+func CraftLoop(code string, a Runner) {
 	item := Item{Code: code, Quantity: 1}
 	loop := true
 	for loop {
-		res, status := Crafting(item)
+		res, status := a.Crafting(item)
 		if status != 200 {
 			loop = false
 			PrintStatus(status)
@@ -86,34 +86,34 @@ func CraftLoop(code string) {
 	}
 }
 
-func RoutineCopperBars() {
+func RoutineCopperBars(a Runner) {
 	copper := "copper"
 	for {
 		// Move to copper mine
 		c := Coordinate{X: 2, Y: 0}
-		res, status := Move(c)
+		res, status := a.Move(c)
 		if status != 200 && status != 490 {
 			panic(status)
 		} else {
 			WaitOnCooldown(res)
 		}
 		// Gather until inventory full
-		GatherLoop()
+		GatherLoop(a)
 		// Move to forge
 		c.X = 1
 		c.Y = 5
-		res, status = Move(c)
+		res, status = a.Move(c)
 		if status != 200 {
 			panic(status)
 		} else {
 			WaitOnCooldown(res)
 		}
 		// Craft copper bars
-		CraftLoop(copper)
+		CraftLoop(copper, a)
 		// Move to bank
 		c.X = 4
 		c.Y = 1
-		res, status = Move(c)
+		res, status = a.Move(c)
 		if status != 200 {
 			panic(status)
 		} else {
@@ -130,7 +130,7 @@ func RoutineCopperBars() {
 			}
 		}
 		// Deposit copper bars into bank
-		res, status = BankDeposit(copper, quantity)
+		res, status = a.BankDeposit(copper, quantity)
 		if status != 200 {
 			panic(status)
 		} else {
@@ -139,34 +139,34 @@ func RoutineCopperBars() {
 	}
 }
 
-func RoutineChickenFarming() {
+func RoutineChickenFarming(a Runner) {
 	cookedChicken := "cooked_chicken"
 	egg := "egg"
 	feather := "feather"
 	for {
 		// Move to chickens
 		c := Coordinate{X: 0, Y: 1}
-		res, status := Move(c)
+		res, status := a.Move(c)
 		if status != 200 && status != 490 {
 			panic(status)
 		} else {
 			WaitOnCooldown(res)
 		}
 		// Fight 'til death!
-		FightLoop()
+		FightLoop(a)
 		// Move to kitchen
 		c.X = 1
-		res, status = Move(c)
+		res, status = a.Move(c)
 		if status != 200 && status != 490 {
 			panic(status)
 		} else {
 			WaitOnCooldown(res)
 		}
 		// Cook chicken
-		CraftLoop(cookedChicken)
+		CraftLoop(cookedChicken, a)
 		// Move to bank
 		c.X = 4
-		res, status = Move(c)
+		res, status = a.Move(c)
 		if status != 200 {
 			panic(status)
 		} else {
@@ -188,19 +188,19 @@ func RoutineChickenFarming() {
 			}
 		}
 		// Deposit items into bank
-		res, status = BankDeposit(cookedChicken, chickenQuantity)
+		res, status = a.BankDeposit(cookedChicken, chickenQuantity)
 		if status != 200 {
 			panic(status)
 		} else {
 			WaitOnCooldown(res)
 		}
-		res, status = BankDeposit(egg, eggQuantity)
+		res, status = a.BankDeposit(egg, eggQuantity)
 		if status != 200 {
 			panic(status)
 		} else {
 			WaitOnCooldown(res)
 		}
-		res, status = BankDeposit(feather, featherQuantity)
+		res, status = a.BankDeposit(feather, featherQuantity)
 		if status != 200 {
 			panic(status)
 		} else {

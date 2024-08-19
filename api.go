@@ -1,48 +1,32 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 )
 
-func GetFileScanner(path string) *bufio.Scanner {
-	f, err := os.Open(path)
-	if err != nil {
-		panic(err)
-	}
-	scanner := bufio.NewScanner(f)
-	scanner.Split(bufio.ScanLines)
-	return scanner
+type Runner struct {
+	Token     string
+	Character string
 }
 
-func loadToken() string {
-	scanner := GetFileScanner("token.txt")
-	var token string
-	for scanner.Scan() {
-		token = scanner.Text()
-	}
-	return token
-}
-
-func sendActionRequest(action string, body []byte) ([]byte, int) {
-	character := "LegDay"
+func (a Runner) sendActionRequest(action string, body []byte) ([]byte, int) {
+	character := a.Character
 	endpoint := fmt.Sprintf("/my/%s/action/%s", character, action)
-	return sendRequest(body, endpoint)
+	return a.sendRequest(body, endpoint)
 }
 
-func sendCharacterRequest(name string) ([]byte, int) {
-	endpoint := fmt.Sprintf("/characters/%s", name)
-	return sendRequest([]byte{}, endpoint)
+func (a Runner) sendCharacterRequest() ([]byte, int) {
+	endpoint := fmt.Sprintf("/characters/%s", a.Character)
+	return a.sendRequest([]byte{}, endpoint)
 }
 
-func sendRequest(body []byte, endpoint string) ([]byte, int) {
+func (a Runner) sendRequest(body []byte, endpoint string) ([]byte, int) {
 	server := "https://api.artifactsmmo.com"
-	token := loadToken()
+	token := a.Token
 	url := fmt.Sprintf("%s%s", server, endpoint)
 	r, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
@@ -64,76 +48,76 @@ func sendRequest(body []byte, endpoint string) ([]byte, int) {
 	return response, res.StatusCode
 }
 
-func Move(c Coordinate) ([]byte, int) {
+func (a Runner) Move(c Coordinate) ([]byte, int) {
 	fmt.Printf("Moving to %d, %d\n", c.X, c.Y)
 	b, err := json.Marshal(c)
 	if err != nil {
 		panic(err)
 	}
-	return sendActionRequest("move", b)
+	return a.sendActionRequest("move", b)
 }
 
-func Fight() ([]byte, int) {
+func (a Runner) Fight() ([]byte, int) {
 	fmt.Println("Fight!")
-	return sendActionRequest("fight", []byte{})
+	return a.sendActionRequest("fight", []byte{})
 }
 
-func Gathering() ([]byte, int) {
+func (a Runner) Gathering() ([]byte, int) {
 	fmt.Println("Gathering at current location")
-	return sendActionRequest("gathering", []byte{})
+	return a.sendActionRequest("gathering", []byte{})
 }
 
-func Crafting(item Item) ([]byte, int) {
+func (a Runner) Crafting(item Item) ([]byte, int) {
 	fmt.Printf("Crafting %s\n", item.Code)
 	b, err := json.Marshal(item)
 	if err != nil {
 		panic(err)
 	}
-	return sendActionRequest("crafting", b)
+	return a.sendActionRequest("crafting", b)
 }
 
 func Recycling() {
 
 }
 
-func Equip(item Item) ([]byte, int) {
+func (a Runner) Equip(item Item) ([]byte, int) {
 	b, err := json.Marshal(item)
 	if err != nil {
 		panic(err)
 	}
-	return sendActionRequest("equip", b)
+	return a.sendActionRequest("equip", b)
 }
 
-func Unequip(slot Slot) ([]byte, int) {
+func (a Runner) Unequip(slot Slot) ([]byte, int) {
 	b, err := json.Marshal(slot)
 	if err != nil {
 		panic(err)
 	}
-	return sendActionRequest("unequip", b)
+	return a.sendActionRequest("unequip", b)
 }
 
 func Delete() {
 
 }
 
-func BankDeposit(code string, quantity int) ([]byte, int) {
+func (a Runner) BankDeposit(code string, quantity int) ([]byte, int) {
 	fmt.Printf("Depositing %d %s into bank\n", quantity, code)
 	item := Item{Code: code, Quantity: quantity}
 	b, err := json.Marshal(item)
 	if err != nil {
 		panic(err)
 	}
-	return sendActionRequest("bank/deposit", b)
+	return a.sendActionRequest("bank/deposit", b)
 }
 
-func BankWithdraw(code string, quantity int) ([]byte, int) {
+func (a Runner) BankWithdraw(code string, quantity int) ([]byte, int) {
 	fmt.Printf("Requesting %d %s from bank\n", quantity, code)
 	item := Item{Code: code, Quantity: quantity}
 	b, err := json.Marshal(item)
 	if err != nil {
 		panic(err)
 	}
-	return sendActionRequest("bank/withdraw", b)
+	return a.sendActionRequest("bank/withdraw", b)
 }
 
 func BankDepositGold() {
@@ -152,18 +136,18 @@ func GeSell() {
 
 }
 
-func TaskAccept() ([]byte, int) {
+func (a Runner) TaskAccept() ([]byte, int) {
 	fmt.Printf("Accepting task\n")
-	return sendActionRequest("task/new", []byte{})
+	return a.sendActionRequest("task/new", []byte{})
 }
 
-func TaskComplete() ([]byte, int) {
+func (a Runner) TaskComplete() ([]byte, int) {
 	fmt.Println("Completing task")
-	return sendActionRequest("task/complete", []byte{})
+	return a.sendActionRequest("task/complete", []byte{})
 }
 
-func GetInventory() []InventorySlot {
-	res, code := sendCharacterRequest("LegDay")
+func (a Runner) GetInventory() []InventorySlot {
+	res, code := a.sendCharacterRequest()
 	if code != 200 {
 		panic(code)
 	}
