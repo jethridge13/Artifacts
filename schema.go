@@ -10,6 +10,13 @@ type SkillInfoSchema struct {
 	Xp int `json:"xp"`
 }
 
+type Item struct {
+	Code     string `json:"code"`
+	Slot     string `json:"slot"`
+	Count    int    `json:"count"`
+	Quantity int    `json:"quantity"`
+}
+
 type Character struct {
 	Name                      string          `json:"name"`
 	Skin                      string          `json:"skin"`
@@ -123,6 +130,23 @@ type GetMapSchema struct {
 	Page  int         `json:"page"`
 	Size  int         `json:"size"`
 	Pages int         `json:"pages"`
+}
+
+type FightSchema struct {
+	Xp     int      `json:"xp"`
+	Gold   int      `json:"gold"`
+	Drops  []Item   `json:"drops"`
+	Turns  int      `json:"turns"`
+	Logs   []string `json:"logs"`
+	Result string   `json:"result"`
+}
+
+type CharacterFightDataSchema struct {
+	Data struct {
+		Cooldown  CooldownSchema `json:"cooldown"`
+		Fight     FightSchema    `json:"fight"`
+		Character Character      `json:"character"`
+	} `json:"data"`
 }
 
 type GenericSchema struct {

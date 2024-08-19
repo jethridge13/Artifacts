@@ -48,6 +48,30 @@ func GatherLoop() {
 	}
 }
 
+func FightLoop() {
+	loop := true
+	lossCount := 0
+	for loop {
+		res, status := Fight()
+		if status != 200 {
+			loop = false
+			PrintStatus(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		var response CharacterFightDataSchema
+		json.Unmarshal(res, &response)
+		if response.Data.Fight.Result == "lose" {
+			lossCount += 1
+		} else {
+			lossCount = 0
+		}
+		if lossCount == 5 {
+			loop = false
+		}
+	}
+}
+
 func CraftLoop(code string) {
 	item := Item{Code: code, Quantity: 1}
 	loop := true

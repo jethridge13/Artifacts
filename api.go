@@ -17,13 +17,6 @@ type Slot struct {
 	Slot string `json:"slot"`
 }
 
-type Item struct {
-	Code     string `json:"code"`
-	Slot     string `json:"slot"`
-	Count    int    `json:"count"`
-	Quantity int    `json:"quantity"`
-}
-
 func sendActionRequest(action string, body []byte) ([]byte, int) {
 	character := "LegDay"
 	endpoint := fmt.Sprintf("/my/%s/action/%s", character, action)
@@ -69,6 +62,7 @@ func Move(c Coordinate) ([]byte, int) {
 }
 
 func Fight() ([]byte, int) {
+	fmt.Println("Fight!")
 	return sendActionRequest("fight", []byte{})
 }
 
@@ -146,12 +140,14 @@ func GeSell() {
 
 }
 
-func TaskAccept() {
-
+func TaskAccept() ([]byte, int) {
+	fmt.Printf("Accepting task\n")
+	return sendActionRequest("task/new", []byte{})
 }
 
-func TaskComplete() {
-
+func TaskComplete() ([]byte, int) {
+	fmt.Println("Completing task")
+	return sendActionRequest("task/complete", []byte{})
 }
 
 func GetInventory() []InventorySlot {
