@@ -8,15 +8,6 @@ import (
 	"net/http"
 )
 
-type Coordinate struct {
-	X int `json:"x"`
-	Y int `json:"y"`
-}
-
-type Slot struct {
-	Slot string `json:"slot"`
-}
-
 func sendActionRequest(action string, body []byte) ([]byte, int) {
 	character := "LegDay"
 	endpoint := fmt.Sprintf("/my/%s/action/%s", character, action)

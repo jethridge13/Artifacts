@@ -10,6 +10,15 @@ type SkillInfoSchema struct {
 	Xp int `json:"xp"`
 }
 
+type Coordinate struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
+type Slot struct {
+	Slot string `json:"slot"`
+}
+
 type Item struct {
 	Code     string `json:"code"`
 	Slot     string `json:"slot"`
