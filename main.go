@@ -27,5 +27,7 @@ func loadToken() string {
 func main() {
 	token := loadToken()
 	a := Runner{Token: token, Character: "LegDay"}
-	RoutineChickenFarming(a)
+	go RoutineChickenFarming(a)
+	b := Runner{Token: token, Character: "LegBot"}
+	RoutineCopperBars(b)
 }
