@@ -138,3 +138,73 @@ func RoutineCopperBars() {
 		}
 	}
 }
+
+func RoutineChickenFarming() {
+	cookedChicken := "cooked_chicken"
+	egg := "egg"
+	feather := "feather"
+	for {
+		// Move to chickens
+		c := Coordinate{X: 0, Y: 1}
+		res, status := Move(c)
+		if status != 200 && status != 490 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		// Fight 'til death!
+		FightLoop()
+		// Move to kitchen
+		c.X = 1
+		res, status = Move(c)
+		if status != 200 && status != 490 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		// Cook chicken
+		CraftLoop(cookedChicken)
+		// Move to bank
+		c.X = 4
+		res, status = Move(c)
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		// Get character inventory
+		var response GenericSchema
+		json.Unmarshal(res, &response)
+		chickenQuantity := 0
+		eggQuantity := 0
+		featherQuantity := 0
+		for _, s := range response.Data.Character.Inventory {
+			if s.Code == cookedChicken {
+				chickenQuantity = s.Quantity
+			} else if s.Code == egg {
+				eggQuantity = s.Quantity
+			} else if s.Code == feather {
+				featherQuantity = s.Quantity
+			}
+		}
+		// Deposit items into bank
+		res, status = BankDeposit(cookedChicken, chickenQuantity)
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		res, status = BankDeposit(egg, eggQuantity)
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		res, status = BankDeposit(feather, featherQuantity)
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+	}
+}
