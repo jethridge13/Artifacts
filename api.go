@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Runner struct {
@@ -49,7 +50,7 @@ func (a Runner) sendRequest(body []byte, endpoint string) ([]byte, int) {
 }
 
 func (a Runner) Move(c Coordinate) ([]byte, int) {
-	fmt.Printf("Moving to %d, %d\n", c.X, c.Y)
+	fmt.Printf("%v: %s: Moving to %d, %d\n", time.Now(), a.Character, c.X, c.Y)
 	b, err := json.Marshal(c)
 	if err != nil {
 		panic(err)
@@ -58,17 +59,17 @@ func (a Runner) Move(c Coordinate) ([]byte, int) {
 }
 
 func (a Runner) Fight() ([]byte, int) {
-	fmt.Println("Fight!")
+	fmt.Printf("%v: %s: Fight!\n", time.Now(), a.Character)
 	return a.sendActionRequest("fight", []byte{})
 }
 
 func (a Runner) Gathering() ([]byte, int) {
-	fmt.Println("Gathering at current location")
+	fmt.Printf("%v: %s: Gathering at current location\n", time.Now(), a.Character)
 	return a.sendActionRequest("gathering", []byte{})
 }
 
 func (a Runner) Crafting(item Item) ([]byte, int) {
-	fmt.Printf("Crafting %s\n", item.Code)
+	fmt.Printf("%v: %s: Crafting %s\n", time.Now(), a.Character, item.Code)
 	b, err := json.Marshal(item)
 	if err != nil {
 		panic(err)
@@ -101,7 +102,7 @@ func Delete() {
 }
 
 func (a Runner) BankDeposit(code string, quantity int) ([]byte, int) {
-	fmt.Printf("Depositing %d %s into bank\n", quantity, code)
+	fmt.Printf("%v: %s: Depositing %d %s into bank\n", time.Now(), a.Character, quantity, code)
 	item := Item{Code: code, Quantity: quantity}
 	b, err := json.Marshal(item)
 	if err != nil {
@@ -111,7 +112,7 @@ func (a Runner) BankDeposit(code string, quantity int) ([]byte, int) {
 }
 
 func (a Runner) BankWithdraw(code string, quantity int) ([]byte, int) {
-	fmt.Printf("Requesting %d %s from bank\n", quantity, code)
+	fmt.Printf("%v: %s: Requesting %d %s from bank\n", time.Now(), a.Character, quantity, code)
 	item := Item{Code: code, Quantity: quantity}
 	b, err := json.Marshal(item)
 	if err != nil {
@@ -137,12 +138,12 @@ func GeSell() {
 }
 
 func (a Runner) TaskAccept() ([]byte, int) {
-	fmt.Printf("Accepting task\n")
+	fmt.Printf("%v: %s: Accepting task\n", time.Now(), a.Character)
 	return a.sendActionRequest("task/new", []byte{})
 }
 
 func (a Runner) TaskComplete() ([]byte, int) {
-	fmt.Println("Completing task")
+	fmt.Printf("%v: %s: Completing task\n", time.Now(), a.Character)
 	return a.sendActionRequest("task/complete", []byte{})
 }
 
