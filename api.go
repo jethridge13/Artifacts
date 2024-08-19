@@ -1,12 +1,33 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 )
+
+func GetFileScanner(path string) *bufio.Scanner {
+	f, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	scanner := bufio.NewScanner(f)
+	scanner.Split(bufio.ScanLines)
+	return scanner
+}
+
+func loadToken() string {
+	scanner := GetFileScanner("token.txt")
+	var token string
+	for scanner.Scan() {
+		token = scanner.Text()
+	}
+	return token
+}
 
 func sendActionRequest(action string, body []byte) ([]byte, int) {
 	character := "LegDay"
@@ -21,7 +42,7 @@ func sendCharacterRequest(name string) ([]byte, int) {
 
 func sendRequest(body []byte, endpoint string) ([]byte, int) {
 	server := "https://api.artifactsmmo.com"
-	token := "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IkpvaGFuU2t1bGxjcnVzaGVyIiwicGFzc3dvcmRfY2hhbmdlZCI6IiJ9.XSij4JbWgWhHyExSkV8aIt6373cNr6HXzGQEP4xn2Ks"
+	token := loadToken()
 	url := fmt.Sprintf("%s%s", server, endpoint)
 	r, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
