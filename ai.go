@@ -178,6 +178,59 @@ func RoutineAshGather(a Runner) {
 	}
 }
 
+func RoutineAshPlanks(a Runner) {
+	plank := "ash_plank"
+	for {
+		// Move to ash tree
+		c := Coordinate{X: -1, Y: 0}
+		res, status := a.Move(c)
+		if status != 200 && status != 490 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		// Gather until inventory full
+		GatherLoop(a)
+		// Move to weaponsmith
+		c.X = 2
+		c.Y = 1
+		res, status = a.Move(c)
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		// Craft ash planks
+		CraftLoop(plank, a)
+		// Move to bank
+		c.X = 4
+		c.Y = 1
+		res, status = a.Move(c)
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		// Get character inventory
+		var response GenericSchema
+		json.Unmarshal(res, &response)
+		quantity := 0
+		for _, s := range response.Data.Character.Inventory {
+			if s.Code == plank {
+				quantity = s.Quantity
+				break
+			}
+		}
+		// Deposit ash planks into bank
+		res, status = a.BankDeposit(plank, quantity)
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+	}
+}
+
 func RoutineChickenFarming(a Runner) {
 	cookedChicken := "cooked_chicken"
 	egg := "egg"

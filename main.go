@@ -31,5 +31,5 @@ func main() {
 	b := Runner{Token: token, Character: "LegBot"}
 	go RoutineCopperBars(b)
 	c := Runner{Token: token, Character: "LegElf"}
-	RoutineAshGather(c)
+	RoutineAshPlanks(c)
 }
