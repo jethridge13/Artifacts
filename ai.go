@@ -191,9 +191,9 @@ func RoutineAshPlanks(a Runner) {
 		}
 		// Gather until inventory full
 		GatherLoop(a)
-		// Move to weaponsmith
-		c.X = 2
-		c.Y = 1
+		// Move to workshop
+		c.X = -2
+		c.Y = -3
 		res, status = a.Move(c)
 		if status != 200 {
 			panic(status)
