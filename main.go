@@ -29,5 +29,7 @@ func main() {
 	a := Runner{Token: token, Character: "LegDay"}
 	go RoutineChickenFarming(a)
 	b := Runner{Token: token, Character: "LegBot"}
-	RoutineCopperBars(b)
+	go RoutineCopperBars(b)
+	c := Runner{Token: token, Character: "LegElf"}
+	RoutineAshGather(c)
 }

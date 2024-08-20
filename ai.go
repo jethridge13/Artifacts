@@ -86,6 +86,28 @@ func CraftLoop(code string, a Runner) {
 	}
 }
 
+func DepositAllInBank(a Runner) {
+	// Move to bank
+	c := Coordinate{X: 4, Y: 1}
+	res, status := a.Move(c)
+	if status != 200 {
+		panic(status)
+	} else {
+		WaitOnCooldown(res)
+	}
+	// Get character inventory
+	inventory := a.GetInventory()
+	// Deposity EVERYTHING!
+	for _, s := range inventory {
+		res, status = a.BankDeposit(s.Code, s.Quantity)
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+	}
+}
+
 func RoutineCopperBars(a Runner) {
 	copper := "copper"
 	for {
@@ -136,6 +158,23 @@ func RoutineCopperBars(a Runner) {
 		} else {
 			WaitOnCooldown(res)
 		}
+	}
+}
+
+func RoutineAshGather(a Runner) {
+	for {
+		// Move to ash tree
+		c := Coordinate{X: -1, Y: 0}
+		res, status := a.Move(c)
+		if status != 200 && status != 490 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		// Gather ash until inventory full
+		GatherLoop(a)
+		// Deposit everything in inventory
+		DepositAllInBank(a)
 	}
 }
 
