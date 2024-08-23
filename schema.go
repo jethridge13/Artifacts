@@ -164,3 +164,11 @@ type GenericSchema struct {
 		Character Character      `json:"character"`
 	} `json:"data"`
 }
+
+type MapResponseSchema struct {
+	Data  []MapSchema `json:"data"`
+	Total int         `json:"total"`
+	Page  int         `json:"page"`
+	Size  int         `json:"size"`
+	Pages int         `json:"pages"`
+}

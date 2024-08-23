@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 )
 
@@ -26,6 +27,8 @@ func loadToken() string {
 
 func main() {
 	token := loadToken()
+	m := LoadEntireMap(token)
+	fmt.Printf("Loaded map. Total tiles: %d\n", len(m))
 	a := Runner{Token: token, Character: "LegDay"}
 	go RoutineChickenFarming(a)
 	b := Runner{Token: token, Character: "LegBot"}

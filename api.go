@@ -17,19 +17,42 @@ type Runner struct {
 func (a Runner) sendActionRequest(action string, body []byte) ([]byte, int) {
 	character := a.Character
 	endpoint := fmt.Sprintf("/my/%s/action/%s", character, action)
-	return a.sendRequest(body, endpoint)
+	return a.sendRequest(body, endpoint, "POST")
 }
 
 func (a Runner) sendCharacterRequest() ([]byte, int) {
 	endpoint := fmt.Sprintf("/characters/%s", a.Character)
-	return a.sendRequest([]byte{}, endpoint)
+	return a.sendRequest([]byte{}, endpoint, "GET")
 }
 
-func (a Runner) sendRequest(body []byte, endpoint string) ([]byte, int) {
+func (a Runner) sendRequest(body []byte, endpoint string, method string) ([]byte, int) {
 	server := "https://api.artifactsmmo.com"
 	token := a.Token
 	url := fmt.Sprintf("%s%s", server, endpoint)
-	r, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	r, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	if err != nil {
+		panic(err)
+	}
+	r.Header.Add("Content-Type", "application/json")
+	r.Header.Add("Accept", "application/json")
+	r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	client := &http.Client{}
+	res, err := client.Do(r)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+	response, err := io.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+	return response, res.StatusCode
+}
+
+func sendRequest(body []byte, endpoint string, method string, token string) ([]byte, int) {
+	server := "https://api.artifactsmmo.com"
+	url := fmt.Sprintf("%s%s", server, endpoint)
+	r, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
 		panic(err)
 	}
@@ -155,4 +178,34 @@ func (a Runner) GetInventory() []InventorySlot {
 	var response CharacterSchema
 	json.Unmarshal(res, &response)
 	return response.Data.Character.Inventory
+}
+
+func LoadEntireMap(token string) map[Coordinate]MapSchema {
+	m := make(map[Coordinate]MapSchema)
+	res, err := sendRequest([]byte{}, "/maps/", "GET", token)
+	if err != 200 {
+		panic(err)
+	}
+	var response MapResponseSchema
+	json.Unmarshal(res, &response)
+	for _, s := range response.Data {
+		c := Coordinate{X: s.X, Y: s.Y}
+		m[c] = s
+	}
+	page := response.Page + 1
+	pages := response.Pages
+	for page <= pages {
+		res, err := sendRequest([]byte{}, fmt.Sprintf("/maps/?page=%d", page), "GET", token)
+		if err != 200 {
+			panic(err)
+		}
+		var response MapResponseSchema
+		json.Unmarshal(res, &response)
+		for _, s := range response.Data {
+			c := Coordinate{X: s.X, Y: s.Y}
+			m[c] = s
+		}
+		page = response.Page + 1
+	}
+	return m
 }
