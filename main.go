@@ -29,10 +29,10 @@ func main() {
 	token := loadToken()
 	m := LoadEntireMap(token)
 	fmt.Printf("Loaded map. Total tiles: %d\n", len(m))
-	a := Runner{Token: token, Character: "LegDay"}
+	a := Runner{Token: token, Name: "LegDay"}
 	go RoutineChickenFarming(a)
-	b := Runner{Token: token, Character: "LegBot"}
+	b := Runner{Token: token, Name: "LegBot"}
 	go RoutineCopperBars(b)
-	c := Runner{Token: token, Character: "LegElf"}
+	c := Runner{Token: token, Name: "LegElf"}
 	RoutineAshPlanks(c)
 }

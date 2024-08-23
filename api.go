@@ -11,21 +11,22 @@ import (
 
 type Runner struct {
 	Token     string
-	Character string
+	Name      string
+	Character Character
 }
 
 func (a Runner) sendActionRequest(action string, body []byte) ([]byte, int) {
-	character := a.Character
+	character := a.Name
 	endpoint := fmt.Sprintf("/my/%s/action/%s", character, action)
 	return a.sendRequest(body, endpoint, "POST")
 }
 
 func (a Runner) sendCharacterRequest() ([]byte, int) {
-	endpoint := fmt.Sprintf("/characters/%s", a.Character)
+	endpoint := fmt.Sprintf("/characters/%s", a.Name)
 	return a.sendRequest([]byte{}, endpoint, "GET")
 }
 
-func (a Runner) sendRequest(body []byte, endpoint string, method string) ([]byte, int) {
+func (a *Runner) sendRequest(body []byte, endpoint string, method string) ([]byte, int) {
 	server := "https://api.artifactsmmo.com"
 	token := a.Token
 	url := fmt.Sprintf("%s%s", server, endpoint)
@@ -46,6 +47,9 @@ func (a Runner) sendRequest(body []byte, endpoint string, method string) ([]byte
 	if err != nil {
 		panic(err)
 	}
+	var responseBody GenericSchema
+	json.Unmarshal(response, &responseBody)
+	a.Character = responseBody.Data.Character
 	return response, res.StatusCode
 }
 
@@ -73,7 +77,7 @@ func sendRequest(body []byte, endpoint string, method string, token string) ([]b
 }
 
 func (a Runner) Move(c Coordinate) ([]byte, int) {
-	fmt.Printf("%v: %s: Moving to %d, %d\n", time.Now(), a.Character, c.X, c.Y)
+	fmt.Printf("%v: %s: Moving to %d, %d\n", time.Now(), a.Name, c.X, c.Y)
 	b, err := json.Marshal(c)
 	if err != nil {
 		panic(err)
@@ -82,17 +86,17 @@ func (a Runner) Move(c Coordinate) ([]byte, int) {
 }
 
 func (a Runner) Fight() ([]byte, int) {
-	fmt.Printf("%v: %s: Fight!\n", time.Now(), a.Character)
+	fmt.Printf("%v: %s: Fight!\n", time.Now(), a.Name)
 	return a.sendActionRequest("fight", []byte{})
 }
 
 func (a Runner) Gathering() ([]byte, int) {
-	fmt.Printf("%v: %s: Gathering at current location\n", time.Now(), a.Character)
+	fmt.Printf("%v: %s: Gathering at current location\n", time.Now(), a.Name)
 	return a.sendActionRequest("gathering", []byte{})
 }
 
 func (a Runner) Crafting(item Item) ([]byte, int) {
-	fmt.Printf("%v: %s: Crafting %s\n", time.Now(), a.Character, item.Code)
+	fmt.Printf("%v: %s: Crafting %s\n", time.Now(), a.Name, item.Code)
 	b, err := json.Marshal(item)
 	if err != nil {
 		panic(err)
@@ -125,7 +129,7 @@ func Delete() {
 }
 
 func (a Runner) BankDeposit(code string, quantity int) ([]byte, int) {
-	fmt.Printf("%v: %s: Depositing %d %s into bank\n", time.Now(), a.Character, quantity, code)
+	fmt.Printf("%v: %s: Depositing %d %s into bank\n", time.Now(), a.Name, quantity, code)
 	item := Item{Code: code, Quantity: quantity}
 	b, err := json.Marshal(item)
 	if err != nil {
@@ -135,7 +139,7 @@ func (a Runner) BankDeposit(code string, quantity int) ([]byte, int) {
 }
 
 func (a Runner) BankWithdraw(code string, quantity int) ([]byte, int) {
-	fmt.Printf("%v: %s: Requesting %d %s from bank\n", time.Now(), a.Character, quantity, code)
+	fmt.Printf("%v: %s: Requesting %d %s from bank\n", time.Now(), a.Name, quantity, code)
 	item := Item{Code: code, Quantity: quantity}
 	b, err := json.Marshal(item)
 	if err != nil {
@@ -161,12 +165,12 @@ func GeSell() {
 }
 
 func (a Runner) TaskAccept() ([]byte, int) {
-	fmt.Printf("%v: %s: Accepting task\n", time.Now(), a.Character)
+	fmt.Printf("%v: %s: Accepting task\n", time.Now(), a.Name)
 	return a.sendActionRequest("task/new", []byte{})
 }
 
 func (a Runner) TaskComplete() ([]byte, int) {
-	fmt.Printf("%v: %s: Completing task\n", time.Now(), a.Character)
+	fmt.Printf("%v: %s: Completing task\n", time.Now(), a.Name)
 	return a.sendActionRequest("task/complete", []byte{})
 }
 
@@ -178,6 +182,41 @@ func (a Runner) GetInventory() []InventorySlot {
 	var response CharacterSchema
 	json.Unmarshal(res, &response)
 	return response.Data.Character.Inventory
+}
+
+func (a Runner) FindNearestEntity(entity string, maps map[Coordinate]MapSchema) (Coordinate, bool) {
+	visited := make(map[Coordinate]bool)
+	queue := make([]Coordinate, 0)
+	start := Coordinate{X: a.Character.X, Y: a.Character.Y}
+	fmt.Printf("Searching for %s starting at (%d, %d)\n", entity, start.X, start.Y)
+	queue = append(queue, start)
+	for len(queue) > 0 {
+		// Check if position contains searching entity
+		var c Coordinate
+		c, queue = queue[0], queue[1:]
+		if maps[c].Content.Code == entity {
+			return c, true
+		}
+		// Search neighboring squares
+		visited[c] = true
+		north := Coordinate{X: c.X, Y: c.Y - 1}
+		east := Coordinate{X: c.X + 1, Y: c.Y}
+		south := Coordinate{X: c.X, Y: c.Y + 1}
+		west := Coordinate{X: c.X - 1, Y: c.Y}
+		if _, ok := visited[north]; !ok {
+			queue = append(queue, north)
+		}
+		if _, ok := visited[east]; !ok {
+			queue = append(queue, east)
+		}
+		if _, ok := visited[south]; !ok {
+			queue = append(queue, south)
+		}
+		if _, ok := visited[west]; !ok {
+			queue = append(queue, west)
+		}
+	}
+	return Coordinate{X: 0, Y: 0}, false
 }
 
 func LoadEntireMap(token string) map[Coordinate]MapSchema {
