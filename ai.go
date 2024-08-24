@@ -99,6 +99,9 @@ func DepositAllInBank(a Runner) {
 	inventory := a.GetInventory()
 	// Deposity EVERYTHING!
 	for _, s := range inventory {
+		if s.Quantity == 0 {
+			continue
+		}
 		res, status = a.BankDeposit(s.Code, s.Quantity)
 		if status != 200 {
 			panic(status)
