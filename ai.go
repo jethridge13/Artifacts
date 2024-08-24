@@ -132,32 +132,37 @@ func RoutineCopperBars(a Runner) {
 		}
 		// Craft copper bars
 		CraftLoop(copper, a)
-		// Move to bank
-		c.X = 4
-		c.Y = 1
+		// Deposit inventory
+		DepositAllInBank(a)
+	}
+}
+
+func RoutineIronBars(a Runner) {
+	iron := "iron"
+	for {
+		// Move to iron mine
+		c := Coordinate{X: 1, Y: 7}
+		res, status := a.Move(c)
+		if status != 200 && status != 490 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		// Gather until inventory full
+		GatherLoop(a)
+		// Move to forge
+		c.X = 1
+		c.Y = 5
 		res, status = a.Move(c)
 		if status != 200 {
 			panic(status)
 		} else {
 			WaitOnCooldown(res)
 		}
-		// Get character inventory
-		var response GenericSchema
-		json.Unmarshal(res, &response)
-		quantity := 0
-		for _, s := range response.Data.Character.Inventory {
-			if s.Code == copper {
-				quantity = s.Quantity
-				break
-			}
-		}
-		// Deposit copper bars into bank
-		res, status = a.BankDeposit(copper, quantity)
-		if status != 200 {
-			panic(status)
-		} else {
-			WaitOnCooldown(res)
-		}
+		// Craft iron bars
+		CraftLoop(iron, a)
+		// Deposit inventory
+		DepositAllInBank(a)
 	}
 }
 

@@ -32,7 +32,9 @@ func main() {
 	a := NewRunner(token, "LegDay")
 	go RoutineTaskSolver(a, m)
 	b := NewRunner(token, "LegBot")
-	go RoutineCopperBars(b)
+	go RoutineIronBars(b)
 	c := NewRunner(token, "LegElf")
-	RoutineAshPlanks(c)
+	go RoutineAshPlanks(c)
+	d := NewRunner(token, "LegRock")
+	RoutineCopperBars(d)
 }
