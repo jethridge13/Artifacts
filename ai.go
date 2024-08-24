@@ -90,7 +90,7 @@ func DepositAllInBank(a Runner) {
 	// Move to bank
 	c := Coordinate{X: 4, Y: 1}
 	res, status := a.Move(c)
-	if status != 200 {
+	if status != 200 && status != 490 {
 		panic(status)
 	} else {
 		WaitOnCooldown(res)

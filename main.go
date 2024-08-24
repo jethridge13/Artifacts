@@ -30,7 +30,6 @@ func main() {
 	m := LoadEntireMap(token)
 	fmt.Printf("Loaded map. Total tiles: %d\n", len(m))
 	a := NewRunner(token, "LegDay")
-	// go RoutineChickenFarming(a)
 	go RoutineTaskSolver(a, m)
 	b := NewRunner(token, "LegBot")
 	go RoutineCopperBars(b)

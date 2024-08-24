@@ -190,7 +190,7 @@ func (a Runner) GetInventory() []InventorySlot {
 	if code != 200 {
 		panic(code)
 	}
-	var response CharacterSchema
+	var response GetCharacterSchema
 	json.Unmarshal(res, &response)
 	return response.Data.Character.Inventory
 }
