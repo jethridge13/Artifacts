@@ -300,3 +300,81 @@ func RoutineChickenFarming(a Runner) {
 		}
 	}
 }
+
+func RoutineTaskSolver(a Runner, m map[Coordinate]MapSchema) bool {
+	var tasks_master Coordinate
+	fmt.Println(a.Character.Task)
+	if a.Character.Task == "" {
+		// If no current task, move to tasks master and accept task
+		tasks_master := Coordinate{X: 1, Y: 2}
+		res, status := a.Move(tasks_master)
+		if status != 200 && status != 490 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+		res, status = a.TaskAccept()
+		if status != 200 {
+			panic(status)
+		} else {
+			WaitOnCooldown(res)
+		}
+	}
+	if a.Character.Task_Type == "monsters" {
+		// Move to monster zone to fight
+		c, movable := a.FindNearestEntity(a.Character.Task, m)
+		if movable {
+			res, status := a.Move(c)
+			if status != 200 && status != 490 {
+				panic(status)
+			} else {
+				WaitOnCooldown(res)
+			}
+		}
+		lossStreak := 0
+		for a.Character.Task_Progress < a.Character.Task_Total && lossStreak < 10 {
+			res, status := a.Fight()
+			if status == 497 {
+				// Inventory full. Deposit everything in the bank and then return
+				DepositAllInBank(a)
+				res, status := a.Move(c)
+				if status != 200 && status != 490 {
+					panic(status)
+				} else {
+					WaitOnCooldown(res)
+				}
+			}
+			if status != 200 {
+				panic(status)
+			} else {
+				WaitOnCooldown(res)
+			}
+			var response FightSchema
+			json.Unmarshal(res, &response)
+			if response.Result == "lose" {
+				lossStreak += 1
+			} else {
+				lossStreak = 0
+			}
+		}
+		if a.Character.Task_Progress >= a.Character.Task_Total {
+			// Turn in task
+			res, status := a.Move(tasks_master)
+			if status != 200 && status != 490 {
+				panic(status)
+			} else {
+				WaitOnCooldown(res)
+			}
+			res, status = a.TaskComplete()
+			if status != 200 {
+				panic(status)
+			} else {
+				WaitOnCooldown(res)
+			}
+			return true
+		} else {
+			return false
+		}
+	}
+	return false
+}

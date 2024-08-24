@@ -15,6 +15,14 @@ type Runner struct {
 	Character Character
 }
 
+func NewRunner(token string, name string) Runner {
+	a := new(Runner)
+	a.Token = token
+	a.Name = name
+	a.Character = a.GetCharacter()
+	return *a
+}
+
 func (a Runner) sendActionRequest(action string, body []byte) ([]byte, int) {
 	character := a.Name
 	endpoint := fmt.Sprintf("/my/%s/action/%s", character, action)
@@ -22,6 +30,7 @@ func (a Runner) sendActionRequest(action string, body []byte) ([]byte, int) {
 }
 
 func (a Runner) sendCharacterRequest() ([]byte, int) {
+	fmt.Println(a.Name)
 	endpoint := fmt.Sprintf("/characters/%s", a.Name)
 	return a.sendRequest([]byte{}, endpoint, "GET")
 }
@@ -48,8 +57,10 @@ func (a *Runner) sendRequest(body []byte, endpoint string, method string) ([]byt
 		panic(err)
 	}
 	var responseBody GenericSchema
-	json.Unmarshal(response, &responseBody)
-	a.Character = responseBody.Data.Character
+	err = json.Unmarshal(response, &responseBody)
+	if err == nil {
+		a.Character = responseBody.Data.Character
+	}
 	return response, res.StatusCode
 }
 
@@ -184,6 +195,16 @@ func (a Runner) GetInventory() []InventorySlot {
 	return response.Data.Character.Inventory
 }
 
+func (a Runner) GetCharacter() Character {
+	res, code := a.sendCharacterRequest()
+	if code != 200 {
+		panic(code)
+	}
+	var response GetCharacterSchema
+	json.Unmarshal(res, &response)
+	return response.Data.Character
+}
+
 func (a Runner) FindNearestEntity(entity string, maps map[Coordinate]MapSchema) (Coordinate, bool) {
 	visited := make(map[Coordinate]bool)
 	queue := make([]Coordinate, 0)
@@ -195,6 +216,7 @@ func (a Runner) FindNearestEntity(entity string, maps map[Coordinate]MapSchema) 
 		var c Coordinate
 		c, queue = queue[0], queue[1:]
 		if maps[c].Content.Code == entity {
+			fmt.Printf("Found %s at (%d, %d)\n", entity, c.X, c.Y)
 			return c, true
 		}
 		// Search neighboring squares
@@ -203,19 +225,32 @@ func (a Runner) FindNearestEntity(entity string, maps map[Coordinate]MapSchema) 
 		east := Coordinate{X: c.X + 1, Y: c.Y}
 		south := Coordinate{X: c.X, Y: c.Y + 1}
 		west := Coordinate{X: c.X - 1, Y: c.Y}
-		if _, ok := visited[north]; !ok {
+		_, ok := visited[north]
+		_, exists := maps[north]
+		if !ok && exists {
 			queue = append(queue, north)
+			visited[north] = true
 		}
-		if _, ok := visited[east]; !ok {
+		_, ok = visited[east]
+		_, exists = maps[east]
+		if !ok && exists {
 			queue = append(queue, east)
+			visited[east] = true
 		}
-		if _, ok := visited[south]; !ok {
+		_, ok = visited[south]
+		_, exists = maps[south]
+		if !ok && exists {
 			queue = append(queue, south)
+			visited[south] = true
 		}
-		if _, ok := visited[west]; !ok {
+		_, ok = visited[west]
+		_, exists = maps[west]
+		if !ok && exists {
 			queue = append(queue, west)
+			visited[west] = true
 		}
 	}
+	fmt.Printf("Could not find %s on map\n", entity)
 	return Coordinate{X: 0, Y: 0}, false
 }
 

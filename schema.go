@@ -165,6 +165,12 @@ type GenericSchema struct {
 	} `json:"data"`
 }
 
+type GetCharacterSchema struct {
+	Data struct {
+		Character
+	} `json:"data"`
+}
+
 type MapResponseSchema struct {
 	Data  []MapSchema `json:"data"`
 	Total int         `json:"total"`
