@@ -310,11 +310,9 @@ func RoutineChickenFarming(a Runner) {
 }
 
 func RoutineTaskSolver(a Runner, m map[Coordinate]MapSchema) bool {
-	var tasks_master Coordinate
-	fmt.Println(a.Character.Task)
+	tasks_master := Coordinate{X: 1, Y: 2}
 	if a.Character.Task == "" {
 		// If no current task, move to tasks master and accept task
-		tasks_master := Coordinate{X: 1, Y: 2}
 		res, status := a.Move(tasks_master)
 		if status != 200 && status != 490 {
 			panic(status)
