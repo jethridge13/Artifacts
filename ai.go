@@ -340,7 +340,7 @@ func RoutineTaskSolver(a Runner, m map[Coordinate]MapSchema) bool {
 			}
 		}
 		lossStreak := 0
-		for a.Character.Task_Progress < a.Character.Task_Total && lossStreak < 10 {
+		for a.Character.Task_Progress < a.Character.Task_Total {
 			res, status := a.Fight()
 			if status == 497 {
 				// Inventory full. Deposit everything in the bank and then return
@@ -363,6 +363,9 @@ func RoutineTaskSolver(a Runner, m map[Coordinate]MapSchema) bool {
 				lossStreak += 1
 			} else {
 				lossStreak = 0
+			}
+			if lossStreak >= 10 {
+				break
 			}
 		}
 		if a.Character.Task_Progress >= a.Character.Task_Total {
